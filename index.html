@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>3D Print Studio Pro - Maliyet & Amortisman</title>
+  
+  <!-- PWA & Mobile App Support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00d2ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="3D Print">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="icon" type="image/png" href="icon.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ─── Lightening Blue & Energy Orange Theme ─── */
+    :root {
+      --bg-primary: #070b14;
+      --bg-secondary: #0d1527;
+      --bg-card: #111c34;
+      --bg-card-hover: #162442;
+      --bg-input: #15223e;
+      --bg-input-focus: #1c2e54;
+      --border: #1e335a;
+      --border-hover: #2e4d82;
+      --border-focus: #00d2ff;
+      
+      /* Neon Lightening Blue */
+      --lightning-blue: #00d2ff;
+      --lightning-blue-hover: #33dcff;
+      --lightning-blue-glow: rgba(0, 210, 255, 0.25);
+      --lightning-blue-soft: rgba(0, 210, 255, 0.12);
+
+      /* Electric Orange */
+      --electric-orange: #ff7b00;
+      --electric-orange-hover: #ff9124;
+      --electric-orange-glow: rgba(255, 123, 0, 0.25);
+      --electric-orange-soft: rgba(255, 123, 0, 0.12);
+
+      --text-primary: #f2f7fc;
+      --text-secondary: #94abc8;
+      --text-muted: #5b7396;
+      
+      --accent: #00d2ff;
+      --accent-secondary: #ff7b00;
+      
+      --success: #00f0a8;
+      --success-bg: rgba(0, 240, 168, 0.12);
+      --danger: #ff4757;
+      --danger-bg: rgba(255, 71, 87, 0.12);
+
+      --gradient-lightning: linear-gradient(135deg, #00d2ff 0%, #0084ff 100%);
+      --gradient-orange: linear-gradient(135deg, #ff9124 0%, #ff5e00 100%);
+      --gradient-card: linear-gradient(160deg, rgba(0,210,255,0.05) 0%, rgba(255,123,0,0.03) 100%);
+      
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --transition: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      user-select: none;
+    }
+    input, select, textarea { user-select: auto; }
+
+    h1, h2, h3, .brand-font {
+      font-family: 'Space Grotesk', -apple-system, sans-serif;
+    }
+
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+    /* ─── Background Lightning & Glow Effect ─── */
+    .bg-lightning {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: 
+        radial-gradient(circle at 15% 15%, rgba(0, 210, 255, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 85% 25%, rgba(255, 123, 0, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 90%, rgba(0, 132, 255, 0.06) 0%, transparent 40%);
+    }
+
+    .app-container {
+      position: relative;
+      z-index: 1;
+      max-width: 1460px;
+      margin: 0 auto;
+      padding: 20px 28px 50px;
+    }
+
+    /* ─── Header ─── */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0 20px;
+    }
+    .logo-group { display: flex; align-items: center; gap: 14px; }
+    .logo-icon {
+      width: 44px; height: 44px;
+      background: var(--gradient-lightning);
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 0 22px var(--lightning-blue-glow);
+    }
+    .logo-text h1 {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .badge-lightning {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: var(--lightning-blue-soft);
+      color: var(--lightning-blue);
+      border: 1px solid rgba(0,210,255,0.3);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .logo-text span { font-size: 12px; color: var(--text-muted); }
+
+    .header-actions { display: flex; gap: 8px; align-items: center; }
+    .btn-top {
+      height: 38px;
+      padding: 0 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 500;
+      transition: var(--transition);
+    }
+    .btn-top:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+      background: var(--bg-card-hover);
+    }
+
+    /* ─── Tab Bar ─── */
+    .tab-bar {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      margin-bottom: 22px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .tab-btn:hover { color: var(--text-primary); background: var(--bg-card); }
+    .tab-btn.active {
+      background: var(--gradient-lightning);
+      color: #041224;
+      font-weight: 700;
+      box-shadow: 0 0 18px var(--lightning-blue-glow);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ─── Cards ─── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      margin-bottom: 18px;
+      position: relative;
+      transition: var(--transition);
+    }
+    .card:hover { border-color: var(--border-hover); }
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-primary);
+    }
+    .card-title-left { display: flex; align-items: center; gap: 10px; }
+    .icon-box {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .icon-box.blue { background: var(--lightning-blue-soft); color: var(--lightning-blue); border: 1px solid rgba(0,210,255,0.3); }
+    .icon-box.orange { background: var(--electric-orange-soft); color: var(--electric-orange); border: 1px solid rgba(255,123,0,0.3); }
+    .icon-box.green { background: var(--success-bg); color: var(--success); }
+
+    /* ─── Quick Stats Compact Header ─── */
+    .machine-quick-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .mq-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+    .mq-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+    }
+    .mq-card.blue::after { background: var(--lightning-blue); box-shadow: 0 0 8px var(--lightning-blue); }
+    .mq-card.orange::after { background: var(--electric-orange); box-shadow: 0 0 8px var(--electric-orange); }
+    .mq-card.green::after { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .mq-val {
+      font-size: 20px;
+      font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.5px;
+    }
+    .mq-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    /* ─── Grid Systems ─── */
+    .two-col { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 18px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+
+    /* ─── Forms & Inputs ─── */
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .form-label .sub {
+      font-size: 10px;
+      text-transform: none;
+      color: var(--text-muted);
+      font-weight: normal;
+    }
+    .form-input, .form-select {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 13px;
+      transition: var(--transition);
+      outline: none;
+    }
+    .form-input:focus, .form-select:focus {
+      border-color: var(--lightning-blue);
+      background: var(--bg-input-focus);
+      box-shadow: 0 0 0 3px var(--lightning-blue-soft);
+    }
+    .input-with-unit { position: relative; }
+    .input-with-unit .unit {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      font-size: 11px; color: var(--text-muted); font-weight: 700; pointer-events: none;
+    }
+    .input-with-unit .form-input { padding-right: 52px; }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 18px; border: none; border-radius: var(--radius-sm);
+      font-family: inherit; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: var(--transition); white-space: nowrap;
+    }
+    .btn-lightning {
+      background: var(--gradient-lightning);
+      color: #041224;
+      box-shadow: 0 0 16px var(--lightning-blue-glow);
+    }
+    .btn-lightning:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    
+    .btn-orange {
+      background: var(--gradient-orange);
+      color: #ffffff;
+      box-shadow: 0 0 16px var(--electric-orange-glow);
+    }
+    .btn-orange:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+    .btn-secondary {
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--border-hover); color: var(--text-primary); }
+    
+    .btn-danger-outline {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid rgba(255,71,87,0.3);
+    }
+    .btn-danger-outline:hover { background: var(--danger-bg); border-color: var(--danger); }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-icon { width: 32px; height: 32px; padding: 0; border-radius: var(--radius-sm); font-size: 14px; }
+
+    /* ─── Multicolor Row ─── */
+    .multi-filament-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .filament-row {
+      display: grid;
+      grid-template-columns: 2.2fr 1.1fr 1fr 36px;
+      gap: 10px;
+      align-items: center;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      transition: var(--transition);
+    }
+    .filament-row:hover { border-color: var(--border-hover); }
+    .filament-row .row-cost {
+      font-size: 13px; font-weight: 700; color: var(--lightning-blue); text-align: right;
+    }
+    .filament-row .row-cost-label { font-size: 10px; color: var(--text-muted); font-weight: normal; }
+    .filament-row .btn-del-row {
+      width: 32px; height: 32px; border: none; background: transparent;
+      color: var(--text-muted); cursor: pointer; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      transition: var(--transition);
+    }
+    .filament-row .btn-del-row:hover { background: var(--danger-bg); color: var(--danger); }
+
+    .summary-strip {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 14px; border-radius: var(--radius-sm);
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      font-size: 12px; color: var(--text-secondary); margin-bottom: 14px;
+    }
+
+    /* ─── Compact Amortization Box inside Calc Tab ─── */
+    .amort-quick-box {
+      background: rgba(0, 210, 255, 0.04);
+      border: 1px solid rgba(0, 210, 255, 0.2);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .amort-quick-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .amort-quick-title {
+      font-size: 12px; font-weight: 700; color: var(--lightning-blue);
+      text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;
+    }
+    .amort-inline-grid {
+      display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 10px;
+    }
+
+    /* ─── Results Panel & Breakdown ─── */
+    .result-cards-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+    }
+    .result-stat-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+    .result-stat-card.blue-card {
+      background: rgba(0, 210, 255, 0.07);
+      border-color: rgba(0, 210, 255, 0.35);
+      box-shadow: 0 0 20px rgba(0,210,255,0.08);
+    }
+    .result-stat-card.orange-card {
+      background: rgba(255, 123, 0, 0.08);
+      border-color: rgba(255, 123, 0, 0.4);
+      box-shadow: 0 0 20px rgba(255,123,0,0.08);
+    }
+    .result-stat-card .r-label {
+      font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;
+      color: var(--text-muted); margin-bottom: 4px;
+    }
+    .result-stat-card .r-value {
+      font-size: 26px; font-weight: 800; font-family: 'Space Grotesk', sans-serif;
+    }
+    .result-stat-card.blue-card .r-value { color: var(--lightning-blue); }
+    .result-stat-card.orange-card .r-value { color: var(--electric-orange); }
+
+    .breakdown-box {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .b-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 16px; font-size: 13px; border-bottom: 1px solid var(--border);
+    }
+    .b-row:last-child { border-bottom: none; }
+    .b-row .b-label { color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+    .b-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .b-val { font-weight: 600; font-family: 'Space Grotesk', sans-serif; }
+    .b-row.total-row {
+      background: var(--lightning-blue-soft);
+      font-weight: 700;
+    }
+    .b-row.total-row .b-val { color: var(--lightning-blue); font-size: 15px; }
+    .b-row.sale-row {
+      background: var(--electric-orange-soft);
+      font-weight: 700;
+    }
+    .b-row.sale-row .b-val { color: var(--electric-orange); font-size: 16px; }
+
+    /* ─── Tables ─── */
+    .table-wrap { overflow-x: auto; }
+    .data-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .data-table th {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-muted); text-align: left; padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 12px 14px; font-size: 13px; border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .data-table tbody tr:hover { background: var(--bg-card-hover); }
+
+    .badge {
+      display: inline-block; padding: 3px 8px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+    }
+    .badge-pla { background: rgba(0,210,255,0.12); color: var(--lightning-blue); }
+    .badge-petg { background: rgba(255,123,0,0.12); color: var(--electric-orange); }
+    .badge-other { background: rgba(148,171,200,0.12); color: var(--text-secondary); }
+
+    .color-chip {
+      display: inline-block; width: 14px; height: 14px; border-radius: 50%;
+      border: 1px solid var(--border); vertical-align: middle; margin-right: 6px;
+    }
+
+    /* ─── Progress Bar ─── */
+    .amort-progress-bar-wrap {
+      width: 100%; height: 16px; background: var(--bg-input); border-radius: 20px;
+      border: 1px solid var(--border); overflow: hidden; margin: 10px 0 6px;
+    }
+    .amort-progress-bar {
+      height: 100%; background: var(--gradient-lightning); border-radius: 20px;
+      transition: width 0.4s ease; display: flex; align-items: center; justify-content: flex-end;
+      padding-right: 8px; font-size: 10px; font-weight: 800; color: #041224;
+    }
+
+    /* ─── Presets Grid ─── */
+    .presets-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px;
+    }
+    .preset-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column;
+      justify-content: space-between; transition: var(--transition);
+    }
+    .preset-card:hover {
+      border-color: var(--border-hover); transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(3, 7, 15, 0.75);
+      backdrop-filter: blur(6px); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.15s ease;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 24px; width: 92%; max-width: 520px;
+      max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px;
+    }
+    .modal-close {
+      width: 32px; height: 32px; border: none; border-radius: var(--radius-sm);
+      background: var(--bg-input); color: var(--text-secondary); cursor: pointer;
+      font-size: 16px; display: flex; align-items: center; justify-content: center;
+    }
+    .modal-close:hover { background: var(--danger-bg); color: var(--danger); }
+
+    /* ─── Custom In-App Confirm Dialog (Replaces broken window.confirm) ─── */
+    .confirm-box {
+      text-align: center; padding: 10px 0;
+    }
+    .confirm-icon {
+      font-size: 40px; margin-bottom: 12px; color: var(--danger);
+    }
+    .confirm-title {
+      font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary);
+    }
+    .confirm-msg {
+      font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5;
+    }
+    .confirm-actions {
+      display: flex; gap: 10px; justify-content: center;
+    }
+
+    /* ─── Toast ─── */
+    .toast-container {
+      position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+      display: flex; flex-direction: column-reverse; gap: 8px;
+    }
+    .toast {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 12px 18px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5); font-size: 13px;
+      display: flex; align-items: center; gap: 10px; min-width: 280px;
+      animation: fadeIn 0.2s ease;
+    }
+    .toast.success { border-left: 3px solid var(--lightning-blue); }
+    .toast.error { border-left: 3px solid var(--danger); }
+    .toast.info { border-left: 3px solid var(--electric-orange); }
+
+    .color-input-wrap { display: flex; align-items: center; gap: 8px; }
+    .color-input-wrap input[type="color"] {
+      width: 38px; height: 36px; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); background: var(--bg-input); cursor: pointer; padding: 2px;
+    }
+
+    @media (max-width: 980px) {
+      .two-col { grid-template-columns: 1fr; }
+      .machine-quick-bar { grid-template-columns: 1fr 1fr; }
+      .app-container { padding: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-lightning"></div>
+
+<div class="app-container">
+  <!-- Header -->
+  <header class="app-header">
+    <div class="logo-group">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <h1>3D Print Studio <span class="badge-lightning">LIGHTNING</span></h1>
+        <span>Maliyet, Amortisman ve Multicolor Baskı Yönetimi</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-top" onclick="exportData()" title="Verileri Yedekle">📥 Yedekle</button>
+      <button class="btn-top" onclick="importDataClick()" title="Yedekten Geri Yükle">📤 İçe Aktar</button>
+      <input type="file" id="import-file" style="display:none" onchange="importData(event)">
+    </div>
+  </header>
+
+  <!-- Quick Machine Status Bar (Her zaman göz önünde) -->
+  <div class="machine-quick-bar">
+    <div class="mq-card blue">
+      <div class="mq-val" id="top-machine-price" style="color:var(--lightning-blue);">0 TL</div>
+      <div class="mq-lbl">Yazıcı Bedeli</div>
+    </div>
+    <div class="mq-card blue">
+      <div class="mq-val" id="top-hourly-amort" style="color:var(--lightning-blue);">0.00 TL/sa</div>
+      <div class="mq-lbl">Saatlik Amortisman</div>
+    </div>
+    <div class="mq-card orange">
+      <div class="mq-val" id="top-remaining-hours" style="color:var(--electric-orange);">0 sa</div>
+      <div class="mq-lbl">Kalan Amortisman Saati</div>
+    </div>
+    <div class="mq-card green">
+      <div class="mq-val" id="top-total-profit" style="color:var(--success);">0 TL</div>
+      <div class="mq-lbl">Kümülatif Kâr</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('calculate')">
+      <span>🧮</span><span>Baskı Hesaplama & Amortisman</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('presets')">
+      <span>📦</span><span>Hazır Modeller (Katalog)</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('filament')">
+      <span>🧵</span><span>Filamentler</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('history')">
+      <span>📜</span><span>Baskı Geçmişi</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 1: HESAPLAMA (Tüm Amortisman & Multicolor Tek Ekranda)
+       ══════════════════════════════════════════════════════════ -->
+  <div id="tab-calculate" class="tab-panel active">
+    <div class="two-col">
+
+      <!-- Sol: Girdiler -->
+      <div>
+        <!-- Amortisman & Makine Hızlı Ayar Paneli (Tek Sayfada Kolay Erişim) -->
+        <div class="amort-quick-box">
+          <div class="amort-quick-header">
+            <div class="amort-quick-title">
+              <span>⚡</span><span>Yazıcı & Amortisman Ayarları (Anlık Düzenle)</span>
+            </div>
+            <span id="amort-pct-tag" style="font-size:11px; font-weight:700; color:var(--lightning-blue);">%0 Tamamlandı</span>
+          </div>
+
+          <div class="amort-inline-grid">
+            <div class="form-group">
+              <label class="form-label">Yazıcı Bedeli</label>
+              <div class="input-with-unit">
+                <input type="number" class="form-input" id="cfg-printer-price" placeholder="0" min="0" step="500" oninput="onAmortInputLive()">
+                <span class="unit">TL</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Hedef Saat</label>
+              <div class="input-with-unit">
+                <input type="number" class="form-input" id="cfg-target-hours" placeholder="2000" min="10" step="50" oninput="onAmortInputLive()">
+                <span class="unit">saat</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Elektrik/Saat</label>
+              <div class="input-with-unit">
+                <input type="number" class="form-input" id="cfg-electricity" placeholder="2.50" min="0" step="0.1" oninput="onAmortInputLive()">
+                <span class="unit">TL</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mini Amortisman Barı -->
+          <div class="amort-progress-bar-wrap">
+            <div class="amort-progress-bar" id="mini-amort-bar" style="width:0%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:4px;">
+            <span>Şu ana kadar: <strong id="mini-done-hours" style="color:var(--text-primary);">0 sa</strong> basıldı</span>
+            <span>Kalan Amortisman Bedeli: <strong id="mini-remain-tl" style="color:var(--electric-orange);">0 TL</strong></span>
+          </div>
+        </div>
+
+        <!-- Multicolor Filament Kartı -->
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left">
+              <div class="icon-box blue">🧵</div>
+              <span>Filament Kullanımı (Multicolor / Çok Renkli)</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="addFilamentRow()">
+              ➕ Renk / Filament Ekle
+            </button>
+          </div>
+
+          <div id="multi-filament-list" class="multi-filament-container">
+            <!-- Dinamik satırlar -->
+          </div>
+
+          <div class="summary-strip">
+            <span>Toplam Hammadde: <strong id="c-sum-weight">0 g</strong></span>
+            <span>Maliyet: <strong id="c-sum-material-cost" style="color:var(--lightning-blue);">0.00 TL</strong></span>
+          </div>
+
+          <!-- Baskı Parametreleri -->
+          <div class="card-title" style="margin-top:16px;">
+            <div class="card-title-left">
+              <div class="icon-box orange">⏱️</div>
+              <span>Baskı Süresi & Fiyatlandırma</span>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Baskı Süresi</label>
+              <div class="input-with-unit">
+                <input type="number" class="form-input" id="c-hours" placeholder="3.5" min="0" step="0.1" oninput="liveCalculate()">
+                <span class="unit">saat</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Hedef Kâr Marjı</label>
+              <div class="input-with-unit">
+                <input type="number" class="form-input" id="c-profit" placeholder="45" min="0" max="1000" step="1" oninput="liveCalculate()">
+                <span class="unit">%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Nozzle & Risk Payı</label>
+              <div class="input-with-unit">
+                <input type="number" class="form-input" id="c-wear-pct" placeholder="7" min="0" max="100" step="1" oninput="liveCalculate()">
+                <span class="unit">%</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Model / Sipariş Adı</label>
+              <input type="text" class="form-input" id="c-job-name" placeholder="Örn: Telefon Standı">
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:14px;">
+            <button class="btn btn-secondary btn-sm" onclick="resetCalculator()">🔄 Sıfırla</button>
+            <button class="btn btn-lightning btn-sm" onclick="liveCalculate()">📊 Yeniden Hesapla</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sağ: Rapor ve Eylemler -->
+      <div>
+        <div class="card">
+          <div class="card-title">
+            <div class="card-title-left">
+              <div class="icon-box green">⚡</div>
+              <span>Maliyet & Fiyat Analizi</span>
+            </div>
+          </div>
+
+          <div id="calc-placeholder" style="text-align:center; padding:40px 10px; color:var(--text-muted);">
+            <div style="font-size:36px; margin-bottom:8px; opacity:0.5;">📐</div>
+            <p style="font-weight:600;">Hesaplama Bekleniyor</p>
+            <p style="font-size:12px; margin-top:4px;">Sol tarafta bir filament seçip baskı süresi girdiğinizde rapor anında üretilir.</p>
+          </div>
+
+          <div id="calc-content" style="display:none;">
+            <!-- Büyük Özet Kartları -->
+            <div class="result-cards-grid">
+              <div class="result-stat-card blue-card">
+                <div class="r-label">📦 Net Maliyet</div>
+                <div class="r-value" id="res-net-cost">0.00 TL</div>
+              </div>
+              <div class="result-stat-card orange-card">
+                <div class="r-label">💰 Satış Fiyatı</div>
+                <div class="r-value" id="res-sale-price">0.00 TL</div>
+              </div>
+            </div>
+
+            <!-- Kalem Kalem Döküm -->
+            <div class="breakdown-box">
+              <div class="b-row">
+                <div class="b-label"><span class="b-dot" style="background:var(--lightning-blue);"></span> Hammadde Maliyeti</div>
+                <div class="b-val" id="res-material">0.00 TL</div>
+              </div>
+              <div class="b-row">
+                <div class="b-label"><span class="b-dot" style="background:#ffb142;"></span> Elektrik Tüketimi</div>
+                <div class="b-val" id="res-electricity">0.00 TL</div>
+              </div>
+              <div class="b-row">
+                <div class="b-label"><span class="b-dot" style="background:#2ed573;"></span> Yazıcı Amortismanı (<span id="res-amort-rate">0</span> TL/sa)</div>
+                <div class="b-val" id="res-amortization">0.00 TL</div>
+              </div>
+              <div class="b-row">
+                <div class="b-label"><span class="b-dot" style="background:var(--danger);"></span> Nozzle & Risk Payı (<span id="res-wear-pct">0</span>%)</div>
+                <div class="b-val" id="res-wear">0.00 TL</div>
+              </div>
+              <div class="b-row total-row">
+                <div class="b-label">📦 NET TOPLAM MALİYET</div>
+                <div class="b-val" id="res-total-cost">0.00 TL</div>
+              </div>
+              <div class="b-row">
+                <div class="b-label"><span class="b-dot" style="background:var(--electric-orange);"></span> Net Kâr Tutarı (<span id="res-profit-pct">0</span>%)</div>
+                <div class="b-val" id="res-profit-amt" style="color:var(--electric-orange);">0.00 TL</div>
+              </div>
+              <div class="b-row sale-row">
+                <div class="b-label">💰 TAVSİYE EDİLEN SATIŞ FİYATI</div>
+                <div class="b-val" id="res-final-sale">0.00 TL</div>
+              </div>
+            </div>
+
+            <!-- Aksiyon Butonları -->
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button class="btn btn-orange" onclick="recordPrintJob()">
+                ✅ Baskıyı Tamamla & Amortismana Ekle
+              </button>
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                <button class="btn btn-secondary" onclick="saveAsPresetPrompt()">
+                  ⭐ Hazır Modele Ekle
+                </button>
+                <button class="btn btn-secondary" onclick="copyOfferText()">
+                  📋 Teklifi Kopyala
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 2: HAZIR MODELLER
+       ══════════════════════════════════════════════════════════ -->
+  <div id="tab-presets" class="tab-panel">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left">
+          <div class="icon-box orange">📦</div>
+          <span>Hazır Modeller & Ürün Kataloğu</span>
+        </div>
+        <button class="btn btn-lightning btn-sm" onclick="openNewPresetModal()">
+          ➕ Yeni Model Kaydet
+        </button>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <p style="font-size:12px; color:var(--text-muted);">
+          Sık bastığınız ürünleri kaydedin, müşteri sorduğunda anında güncel fiyatı söyleyin.
+        </p>
+        <input type="text" class="form-input" id="preset-search" placeholder="Model ara..." style="width:220px;" oninput="renderPresets()">
+      </div>
+
+      <div class="presets-grid" id="presets-list-container">
+        <!-- Rendered presets -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 3: FILAMENTLER
+       ══════════════════════════════════════════════════════════ -->
+  <div id="tab-filament" class="tab-panel">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left">
+          <div class="icon-box blue">➕</div>
+          <span>Yeni Filament Tanımla</span>
+        </div>
+      </div>
+      <form id="filament-form" onsubmit="handleFilamentSubmit(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Marka</label>
+            <input type="text" class="form-input" id="f-brand" placeholder="Esun, Porima, Bambu..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tür</label>
+            <select class="form-select" id="f-type" required>
+              <option value="PLA">PLA</option>
+              <option value="PLA+">PLA+</option>
+              <option value="PETG">PETG</option>
+              <option value="ABS">ABS</option>
+              <option value="ASA">ASA</option>
+              <option value="TPU">TPU</option>
+              <option value="Carbon Fiber">Carbon Fiber</option>
+              <option value="Diğer">Diğer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Renk</label>
+            <div class="color-input-wrap">
+              <input type="color" id="f-color" value="#00d2ff">
+              <input type="text" class="form-input" id="f-color-name" placeholder="Elektrik Mavisi..." required style="flex:1">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ambalaj (Gram)</label>
+            <div class="input-with-unit">
+              <input type="number" class="form-input" id="f-weight" placeholder="1000" min="1" required>
+              <span class="unit">g</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Satın Alma Fiyatı</label>
+            <div class="input-with-unit">
+              <input type="number" class="form-input" id="f-price" placeholder="450" min="0" step="0.01" required>
+              <span class="unit">TL</span>
+            </div>
+          </div>
+          <div class="form-group" style="justify-content:flex-end;">
+            <button type="submit" class="btn btn-lightning" style="height:40px; margin-top:auto;">
+              ➕ Envantere Ekle
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left">
+          <div class="icon-box blue">📋</div>
+          <span>Mevcut Filament Envanteri</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <div id="filament-list-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TAB 4: BASKI GEÇMİŞİ
+       ══════════════════════════════════════════════════════════ -->
+  <div id="tab-history" class="tab-panel">
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-left">
+          <div class="icon-box orange">📜</div>
+          <span>Tamamlanan Baskılar & Üretim Arşivi</span>
+        </div>
+        <button class="btn btn-danger-outline btn-sm" onclick="promptClearHistory()">
+          🗑️ Tüm Geçmişi Temizle
+        </button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>Baskı / Model</th>
+              <th>Süre</th>
+              <th>Gramaj</th>
+              <th>Maliyet</th>
+              <th>Satış Fiyatı</th>
+              <th>Kâr</th>
+              <th>İşlem</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     İÇE AKTARMA (IMPORT) SEÇİM MODALI
+     ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="import-options-modal">
+  <div class="modal" style="max-width:440px;">
+    <div style="text-align:center; padding:6px 0 16px;">
+      <div style="font-size:38px; margin-bottom:8px;">📥</div>
+      <h3 style="font-size:18px; font-weight:700; margin-bottom:6px;">Yedek Nasıl Yüklensin?</h3>
+      <p style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+        Yedek dosyasındaki verileri bu cihaza aktarırken mevcut verilerinizi koruyabilir veya tamamen değiştirebilirsiniz:
+      </p>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+      <button class="btn btn-lightning" style="padding:14px; text-align:left; justify-content:flex-start; height:auto; white-space:normal; line-height:1.4;" onclick="executeImport('merge')">
+        <div>
+          <div style="font-size:14px; font-weight:800; display:flex; align-items:center; gap:6px;">
+            <span>🔄</span><span>Üzerine Ekle & Birleştir (Tavsiye Edilen)</span>
+          </div>
+          <div style="font-size:11px; opacity:0.85; margin-top:3px; font-weight:normal;">
+            Bu cihazdaki mevcut filamentleriniz ve modelleriniz <strong>silinmez</strong>. Yedekteki yeni filamentler ve modeller mevcut listenize eklenir.
+          </div>
+        </div>
+      </button>
+
+      <button class="btn btn-secondary" style="padding:14px; text-align:left; justify-content:flex-start; height:auto; white-space:normal; line-height:1.4; border-color:rgba(255,71,87,0.3);" onclick="executeImport('replace')">
+        <div>
+          <div style="font-size:14px; font-weight:700; color:var(--danger); display:flex; align-items:center; gap:6px;">
+            <span>⚠️</span><span>Tüm Verileri Sil ve Değiştir</span>
+          </div>
+          <div style="font-size:11px; color:var(--text-muted); margin-top:3px; font-weight:normal;">
+            Bu cihazdaki tüm mevcut veriler silinir ve cihaz birebir yedek dosyasının haliyle güncellenir.
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <div style="display:flex; justify-content:center;">
+      <button class="btn btn-secondary btn-sm" onclick="cancelImport()">Vazgeç</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     ÖZEL ONAY MODALI (CONFIRM MODAL - ASLA ENGELLENMEZ)
+     ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="custom-confirm-modal">
+  <div class="modal" style="max-width:380px;">
+    <div class="confirm-box">
+      <div class="confirm-icon">⚠️</div>
+      <div class="confirm-title" id="confirm-modal-title">Silme Onayı</div>
+      <div class="confirm-msg" id="confirm-modal-msg">Bu kaydı silmek istediğinize emin misiniz?</div>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" onclick="closeConfirmModal(false)">Vazgeç</button>
+        <button class="btn btn-orange" id="confirm-modal-ok-btn" onclick="closeConfirmModal(true)">Evet, Sil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Preset -->
+<div class="modal-overlay hidden" id="preset-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="preset-modal-title">⭐ Hazır Model Ekle</h3>
+      <button class="modal-close" onclick="closePresetModal()">✕</button>
+    </div>
+    <form id="preset-form" onsubmit="handlePresetSubmit(event)">
+      <div class="form-grid" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label class="form-label">Model Adı</label>
+          <input type="text" class="form-input" id="pm-name" placeholder="Örn: 10'lu Telefon Tutacağı" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Not / Açıklama</label>
+          <input type="text" class="form-input" id="pm-desc" placeholder="Örn: Katman 0.20mm, dolgu %15">
+        </div>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+          <div class="form-group">
+            <label class="form-label">Baskı Süresi</label>
+            <div class="input-with-unit">
+              <input type="number" class="form-input" id="pm-hours" placeholder="4.5" min="0.1" step="0.1" required>
+              <span class="unit">saat</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kâr Marjı</label>
+            <div class="input-with-unit">
+              <input type="number" class="form-input" id="pm-profit" placeholder="45" min="0" step="1" required>
+              <span class="unit">%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label class="form-label">Filamentler</label>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addPresetFilamentRow()">➕ Ekle</button>
+          </div>
+          <div id="pm-filament-rows" style="display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+      </div>
+      <input type="hidden" id="pm-edit-id" value="">
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
+        <button type="button" class="btn btn-secondary" onclick="closePresetModal()">İptal</button>
+        <button type="submit" class="btn btn-lightning">💾 Kaydet</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Filament Düzenle -->
+<div class="modal-overlay hidden" id="edit-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✏️ Filament Düzenle</h3>
+      <button class="modal-close" onclick="closeEditModal()">✕</button>
+    </div>
+    <form id="edit-form" onsubmit="handleEditSubmit(event)">
+      <div class="form-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="form-group">
+          <label class="form-label">Marka</label>
+          <input type="text" class="form-input" id="e-brand" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tür</label>
+          <select class="form-select" id="e-type" required>
+            <option value="PLA">PLA</option>
+            <option value="PLA+">PLA+</option>
+            <option value="PETG">PETG</option>
+            <option value="ABS">ABS</option>
+            <option value="ASA">ASA</option>
+            <option value="TPU">TPU</option>
+            <option value="Carbon Fiber">Carbon Fiber</option>
+            <option value="Diğer">Diğer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Renk</label>
+          <div class="color-input-wrap">
+            <input type="color" id="e-color" value="#00d2ff">
+            <input type="text" class="form-input" id="e-color-name" required style="flex:1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ambalaj (g)</label>
+          <div class="input-with-unit">
+            <input type="number" class="form-input" id="e-weight" min="1" required>
+            <span class="unit">g</span>
+          </div>
+        </div>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label">Satın Alma Fiyatı</label>
+          <div class="input-with-unit">
+            <input type="number" class="form-input" id="e-price" min="0" step="0.01" required>
+            <span class="unit">TL</span>
+          </div>
+        </div>
+      </div>
+      <input type="hidden" id="e-edit-id" value="">
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
+        <button type="button" class="btn btn-secondary" onclick="closeEditModal()">İptal</button>
+        <button type="submit" class="btn btn-lightning">💾 Kaydet</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   STORAGE & DATA LAYER
+   ════════════════════════════════════════════════════════════ */
+const STORAGE_KEYS = {
+  filaments: '3dp_filaments_v3',
+  amortization: '3dp_amort_v3',
+  presets: '3dp_presets_v3',
+  history: '3dp_history_v3'
+};
+
+const DEFAULT_FILAMENTS = [
+  { id: 'f1', brand: 'Porima', type: 'PLA', color: '#00d2ff', colorName: 'Elektrik Mavisi', weight: 1000, price: 420, pricePerG: 0.42, pricePerKg: 420 },
+  { id: 'f2', brand: 'Esun', type: 'PLA+', color: '#ff7b00', colorName: 'Ateş Turuncusu', weight: 1000, price: 450, pricePerG: 0.45, pricePerKg: 450 },
+  { id: 'f3', brand: 'Bambu', type: 'PETG', color: '#ffffff', colorName: 'Kar Beyazı', weight: 1000, price: 490, pricePerG: 0.49, pricePerKg: 490 }
+];
+
+const DEFAULT_AMORT = {
+  printerPrice: 0,        // Kullanıcı kendi fiyatını girsin
+  targetHours: 2000,     // 2000 saatte çıksın
+  electricity: 2.50,     // TL / saat
+  wearPct: 7,            // % Nozzle & Risk Payı
+  defaultProfit: 45,     // % Kâr Marjı
+  completedHours: 0,
+  totalProfit: 0
+};
+
+const DEFAULT_PRESETS = [
+  {
+    id: 'p1',
+    name: "10'lu Masaüstü Telefon Tutacağı",
+    desc: "10 adet katlanabilir ergonomik stand",
+    hours: 8.0,
+    profitPct: 45,
+    items: [{ filamentId: 'f1', grams: 210 }]
+  }
+];
+
+function getFilaments() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.filaments);
+    return raw ? JSON.parse(raw) : DEFAULT_FILAMENTS;
+  } catch { return DEFAULT_FILAMENTS; }
+}
+function saveFilaments(d) { localStorage.setItem(STORAGE_KEYS.filaments, JSON.stringify(d)); }
+
+function getAmort() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.amortization);
+    return raw ? { ...DEFAULT_AMORT, ...JSON.parse(raw) } : DEFAULT_AMORT;
+  } catch { return DEFAULT_AMORT; }
+}
+function saveAmort(d) { localStorage.setItem(STORAGE_KEYS.amortization, JSON.stringify(d)); }
+
+function getPresets() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.presets);
+    return raw ? JSON.parse(raw) : DEFAULT_PRESETS;
+  } catch { return DEFAULT_PRESETS; }
+}
+function savePresets(d) { localStorage.setItem(STORAGE_KEYS.presets, JSON.stringify(d)); }
+
+function getHistory() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.history);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function saveHistory(d) { localStorage.setItem(STORAGE_KEYS.history, JSON.stringify(d)); }
+
+/* ════════════════════════════════════════════════════════════
+   ÖZEL ONAY MODALI (WKWebView confirm() engelini aşar!)
+   ════════════════════════════════════════════════════════════ */
+let confirmCallback = null;
+
+function showConfirm(title, message, onConfirmed) {
+  document.getElementById('confirm-modal-title').textContent = title || 'Silme Onayı';
+  document.getElementById('confirm-modal-msg').textContent = message || 'Bu kaydı silmek istediğinize emin misiniz?';
+  confirmCallback = onConfirmed;
+  document.getElementById('custom-confirm-modal').classList.remove('hidden');
+}
+
+function closeConfirmModal(result) {
+  document.getElementById('custom-confirm-modal').classList.add('hidden');
+  if (result && typeof confirmCallback === 'function') {
+    confirmCallback();
+  }
+  confirmCallback = null;
+}
+
+/* ════════════════════════════════════════════════════════════
+   TOAST & TABS
+   ════════════════════════════════════════════════════════════ */
+function showToast(msg, type = 'success') {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${type === 'error' ? '❌' : (type === 'info' ? '⚡' : '✅')}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => {
+    if (btn.getAttribute('onclick')?.includes(name)) btn.classList.add('active');
+  });
+
+  const panel = document.getElementById(`tab-${name}`);
+  if (panel) panel.classList.add('active');
+
+  if (name === 'calculate') liveCalculate();
+  if (name === 'presets') renderPresets();
+  if (name === 'filament') renderFilaments();
+  if (name === 'history') renderHistoryTable();
+}
+
+/* ════════════════════════════════════════════════════════════
+   AMORTİSMAN ANLIK CANLI GÜNCELLEME
+   ════════════════════════════════════════════════════════════ */
+function loadAmortFields() {
+  const a = getAmort();
+  document.getElementById('cfg-printer-price').value = a.printerPrice || '';
+  document.getElementById('cfg-target-hours').value = a.targetHours || 2000;
+  document.getElementById('cfg-electricity').value = a.electricity || 2.5;
+  document.getElementById('c-wear-pct').value = a.wearPct || 7;
+  document.getElementById('c-profit').value = a.defaultProfit || 45;
+  refreshAmortDisplays();
+}
+
+function onAmortInputLive() {
+  const current = getAmort();
+  const price = parseFloat(document.getElementById('cfg-printer-price').value) || 0;
+  const hours = parseFloat(document.getElementById('cfg-target-hours').value) || 1;
+  const elec = parseFloat(document.getElementById('cfg-electricity').value) || 0;
+
+  current.printerPrice = price;
+  current.targetHours = hours;
+  current.electricity = elec;
+  saveAmort(current);
+
+  refreshAmortDisplays();
+  liveCalculate();
+}
+
+function refreshAmortDisplays() {
+  const a = getAmort();
+  const hourlyAmort = a.targetHours > 0 ? (a.printerPrice / a.targetHours) : 0;
+  const completed = a.completedHours || 0;
+  const remainingHours = Math.max(0, a.targetHours - completed);
+  const progressPct = Math.min(100, (completed / a.targetHours) * 100);
+  const recoveredTl = completed * hourlyAmort;
+  const remainingCost = Math.max(0, a.printerPrice - recoveredTl);
+
+  // Top Bar
+  document.getElementById('top-machine-price').textContent = `${a.printerPrice.toLocaleString('tr-TR')} TL`;
+  document.getElementById('top-hourly-amort').textContent = `${hourlyAmort.toFixed(2)} TL/sa`;
+  document.getElementById('top-remaining-hours').textContent = `${remainingHours.toFixed(1)} sa`;
+  document.getElementById('top-total-profit').textContent = `+${(a.totalProfit || 0).toFixed(0)} TL`;
+
+  // Inline Amort Box
+  document.getElementById('amort-pct-tag').textContent = `%${progressPct.toFixed(1)} Tamamlandı`;
+  document.getElementById('mini-amort-bar').style.width = `${progressPct}%`;
+  document.getElementById('mini-done-hours').textContent = `${completed.toFixed(1)} sa`;
+  document.getElementById('mini-remain-tl').textContent = `${remainingCost.toFixed(0)} TL`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   MULTICOLOR CALCULATION
+   ════════════════════════════════════════════════════════════ */
+let currentCalcData = null;
+
+function addFilamentRow(selectedId = '', gramsVal = '') {
+  const filaments = getFilaments();
+  const list = document.getElementById('multi-filament-list');
+  const rowId = 'row_' + Math.random().toString(36).substring(2, 9);
+
+  let optionsHtml = '<option value="">Filament seçiniz...</option>';
+  filaments.forEach(f => {
+    const isSel = f.id === selectedId ? 'selected' : '';
+    optionsHtml += `<option value="${f.id}" ${isSel}>${f.brand} ${f.type} – ${f.colorName} (${f.pricePerG.toFixed(4)} TL/g)</option>`;
+  });
+
+  const row = document.createElement('div');
+  row.className = 'filament-row';
+  row.id = rowId;
+  row.innerHTML = `
+    <div>
+      <select class="form-select fil-select" onchange="onFilamentRowChange('${rowId}')">
+        ${optionsHtml}
+      </select>
+    </div>
+    <div class="input-with-unit">
+      <input type="number" class="form-input fil-grams" placeholder="0" min="0" step="1" value="${gramsVal}" oninput="onFilamentRowChange('${rowId}')">
+      <span class="unit">g</span>
+    </div>
+    <div class="row-cost">
+      <span class="row-cost-val">0.00 TL</span>
+      <span class="row-cost-label">hammadde</span>
+    </div>
+    <div>
+      <button type="button" class="btn-del-row" title="Satırı Sil" onclick="removeFilamentRow('${rowId}')">✕</button>
+    </div>
+  `;
+  list.appendChild(row);
+  onFilamentRowChange(rowId);
+}
+
+function removeFilamentRow(rowId) {
+  const list = document.getElementById('multi-filament-list');
+  if (list.children.length <= 1) {
+    showToast('En az 1 adet filament satırı kalmalıdır.', 'error');
+    return;
+  }
+  const el = document.getElementById(rowId);
+  if (el) el.remove();
+  liveCalculate();
+}
+
+function onFilamentRowChange(rowId) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  const filId = row.querySelector('.fil-select').value;
+  const grams = parseFloat(row.querySelector('.fil-grams').value) || 0;
+  const costEl = row.querySelector('.row-cost-val');
+
+  if (filId && grams > 0) {
+    const filaments = getFilaments();
+    const f = filaments.find(x => x.id === filId);
+    if (f) {
+      costEl.textContent = `${(grams * f.pricePerG).toFixed(2)} TL`;
+    } else { costEl.textContent = '0.00 TL'; }
+  } else { costEl.textContent = '0.00 TL'; }
+
+  liveCalculate();
+}
+
+function liveCalculate() {
+  const rows = document.querySelectorAll('.filament-row');
+  const filaments = getFilaments();
+  const amort = getAmort();
+
+  let totalWeight = 0;
+  let totalMaterialCost = 0;
+  const usedItems = [];
+
+  rows.forEach(r => {
+    const filId = r.querySelector('.fil-select').value;
+    const grams = parseFloat(r.querySelector('.fil-grams').value) || 0;
+    if (filId && grams > 0) {
+      const f = filaments.find(x => x.id === filId);
+      if (f) {
+        const itemCost = grams * f.pricePerG;
+        totalWeight += grams;
+        totalMaterialCost += itemCost;
+        usedItems.push({ filamentId: f.id, brand: f.brand, type: f.type, colorName: f.colorName, grams, cost: itemCost });
+      }
+    }
+  });
+
+  document.getElementById('c-sum-weight').textContent = `${totalWeight.toFixed(1)} g`;
+  document.getElementById('c-sum-material-cost').textContent = `${totalMaterialCost.toFixed(2)} TL`;
+
+  const hours = parseFloat(document.getElementById('c-hours').value) || 0;
+  const profitPct = parseFloat(document.getElementById('c-profit').value);
+  const actualProfitPct = isNaN(profitPct) ? amort.defaultProfit : profitPct;
+  const wearPct = parseFloat(document.getElementById('c-wear-pct').value) || amort.wearPct;
+
+  const placeholder = document.getElementById('calc-placeholder');
+  const content = document.getElementById('calc-content');
+
+  if (hours <= 0 || usedItems.length === 0) {
+    placeholder.style.display = 'block';
+    content.style.display = 'none';
+    currentCalcData = null;
+    return;
+  }
+
+  placeholder.style.display = 'none';
+  content.style.display = 'block';
+
+  const electricityCost = hours * amort.electricity;
+  const hourlyAmortRate = amort.targetHours > 0 ? (amort.printerPrice / amort.targetHours) : 0;
+  const amortizationCost = hours * hourlyAmortRate;
+
+  const baseCost = totalMaterialCost + electricityCost + amortizationCost;
+  const wearCost = baseCost * (wearPct / 100);
+  const netTotalCost = baseCost + wearCost;
+
+  const profitAmount = netTotalCost * (actualProfitPct / 100);
+  const finalSalePrice = netTotalCost + profitAmount;
+
+  // Render Box
+  document.getElementById('res-net-cost').textContent = `${netTotalCost.toFixed(2)} TL`;
+  document.getElementById('res-sale-price').textContent = `${finalSalePrice.toFixed(2)} TL`;
+
+  document.getElementById('res-material').textContent = `${totalMaterialCost.toFixed(2)} TL`;
+  document.getElementById('res-electricity').textContent = `${electricityCost.toFixed(2)} TL`;
+  document.getElementById('res-amort-rate').textContent = hourlyAmortRate.toFixed(2);
+  document.getElementById('res-amortization').textContent = `${amortizationCost.toFixed(2)} TL`;
+  document.getElementById('res-wear-pct').textContent = wearPct;
+  document.getElementById('res-wear').textContent = `${wearCost.toFixed(2)} TL`;
+  document.getElementById('res-total-cost').textContent = `${netTotalCost.toFixed(2)} TL`;
+  document.getElementById('res-profit-pct').textContent = actualProfitPct;
+  document.getElementById('res-profit-amt').textContent = `${profitAmount.toFixed(2)} TL`;
+  document.getElementById('res-final-sale').textContent = `${finalSalePrice.toFixed(2)} TL`;
+
+  currentCalcData = {
+    name: document.getElementById('c-job-name').value.trim() || 'Multicolor Baskı',
+    hours,
+    totalWeight,
+    items: usedItems,
+    materialCost: totalMaterialCost,
+    electricityCost,
+    amortizationCost,
+    hourlyAmortRate,
+    wearCost,
+    netTotalCost,
+    profitPct: actualProfitPct,
+    profitAmount,
+    finalSalePrice,
+    date: new Date().toISOString()
+  };
+}
+
+function resetCalculator() {
+  document.getElementById('multi-filament-list').innerHTML = '';
+  addFilamentRow();
+  document.getElementById('c-hours').value = '';
+  document.getElementById('c-job-name').value = '';
+  liveCalculate();
+  showToast('Hesaplama alanı sıfırlandı.', 'info');
+}
+
+function recordPrintJob() {
+  if (!currentCalcData) {
+    showToast('Önce geçerli bir baskı hesaplayın.', 'error');
+    return;
+  }
+
+  const amort = getAmort();
+  amort.completedHours = (amort.completedHours || 0) + currentCalcData.hours;
+  amort.totalProfit = (amort.totalProfit || 0) + currentCalcData.profitAmount;
+  saveAmort(amort);
+
+  const history = getHistory();
+  history.unshift({
+    id: 'h_' + Date.now(),
+    name: currentCalcData.name,
+    date: new Date().toLocaleString('tr-TR'),
+    hours: currentCalcData.hours,
+    grams: currentCalcData.totalWeight,
+    netCost: currentCalcData.netTotalCost,
+    salePrice: currentCalcData.finalSalePrice,
+    profit: currentCalcData.profitAmount
+  });
+  saveHistory(history);
+
+  refreshAmortDisplays();
+  renderHistoryTable();
+  showToast(`Baskı kaydedildi! Amortismana +${currentCalcData.hours} sa eklendi.`);
+}
+
+function copyOfferText() {
+  if (!currentCalcData) return;
+  const d = currentCalcData;
+  const filLines = d.items.map(it => `  • ${it.colorName} ${it.brand} ${it.type}: ${it.grams}g`).join('\n');
+  const text = `⚡ *3D Baskı Fiyat Teklifi*\n` +
+               `🔹 *Model:* ${d.name}\n` +
+               `⏱️ *Baskı Süresi:* ${d.hours} Saat\n` +
+               `⚖️ *Toplam Ağırlık:* ${d.totalWeight.toFixed(1)} g\n` +
+               `🧵 *Renkler:*\n${filLines}\n` +
+               `💰 *Fiyat:* ${d.finalSalePrice.toFixed(2)} TL\n` +
+               `\n_Sipariş onayınız için bilgi veriniz._`;
+
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Teklif metni panoya kopyalandı! 📋');
+  });
+}
+
+function saveAsPresetPrompt() {
+  if (!currentCalcData) return;
+  openNewPresetModal(currentCalcData);
+}
+
+/* ════════════════════════════════════════════════════════════
+   FILAMENT İŞLEMLERİ & GÜVENİLİR SİLME
+   ════════════════════════════════════════════════════════════ */
+function handleFilamentSubmit(e) {
+  e.preventDefault();
+  const brand = document.getElementById('f-brand').value.trim();
+  const type = document.getElementById('f-type').value;
+  const color = document.getElementById('f-color').value;
+  const colorName = document.getElementById('f-color-name').value.trim();
+  const weight = parseFloat(document.getElementById('f-weight').value);
+  const price = parseFloat(document.getElementById('f-price').value);
+
+  if (!brand || !type || !colorName || !weight || !price) {
+    showToast('Tüm alanları doldurun.', 'error');
+    return;
+  }
+
+  const filaments = getFilaments();
+  filaments.push({
+    id: 'f_' + Date.now(),
+    brand, type, color, colorName, weight, price,
+    pricePerKg: (price / weight) * 1000,
+    pricePerG: price / weight
+  });
+
+  saveFilaments(filaments);
+  renderFilaments();
+  document.getElementById('filament-form').reset();
+  showToast(`${brand} ${type} (${colorName}) eklendi!`);
+}
+
+// Güvenilir Silme Fonksiyonu
+function deleteFilament(id) {
+  const filaments = getFilaments();
+  const f = filaments.find(x => x.id === id);
+  const name = f ? `${f.brand} ${f.type} (${f.colorName})` : 'Bu filamenti';
+
+  showConfirm(
+    'Filamenti Sil',
+    `"${name}" envanterden tamamen silinecek. Onaylıyor musunuz?`,
+    () => {
+      const updated = filaments.filter(x => x.id !== id);
+      saveFilaments(updated);
+      renderFilaments();
+      // Hesaplama dropdownlarını güncelle
+      liveCalculate();
+      showToast('Filament silindi.', 'info');
+    }
+  );
+}
+
+function openEditModal(id) {
+  const filaments = getFilaments();
+  const f = filaments.find(x => x.id === id);
+  if (!f) return;
+
+  document.getElementById('e-edit-id').value = f.id;
+  document.getElementById('e-brand').value = f.brand;
+  document.getElementById('e-type').value = f.type;
+  document.getElementById('e-color').value = f.color;
+  document.getElementById('e-color-name').value = f.colorName;
+  document.getElementById('e-weight').value = f.weight;
+  document.getElementById('e-price').value = f.price;
+
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+function handleEditSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('e-edit-id').value;
+  const filaments = getFilaments();
+  const idx = filaments.findIndex(x => x.id === id);
+  if (idx === -1) return;
+
+  filaments[idx] = {
+    ...filaments[idx],
+    brand: document.getElementById('e-brand').value.trim(),
+    type: document.getElementById('e-type').value,
+    color: document.getElementById('e-color').value,
+    colorName: document.getElementById('e-color-name').value.trim(),
+    weight: parseFloat(document.getElementById('e-weight').value),
+    price: parseFloat(document.getElementById('e-price').value),
+  };
+  filaments[idx].pricePerKg = (filaments[idx].price / filaments[idx].weight) * 1000;
+  filaments[idx].pricePerG = filaments[idx].price / filaments[idx].weight;
+
+  saveFilaments(filaments);
+  renderFilaments();
+  closeEditModal();
+  liveCalculate();
+  showToast('Filament güncellendi!');
+}
+
+function renderFilaments() {
+  const filaments = getFilaments();
+  const container = document.getElementById('filament-list-container');
+
+  if (filaments.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted);">Henüz filament kaydı bulunmuyor.</div>`;
+    return;
+  }
+
+  container.innerHTML = `
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Marka</th>
+          <th>Tür</th>
+          <th>Renk</th>
+          <th>Gramaj</th>
+          <th>Fiyat</th>
+          <th>TL / kg</th>
+          <th>TL / gram</th>
+          <th style="text-align:right;">İşlem</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filaments.map(f => `
+          <tr>
+            <td><strong>${escapeHtml(f.brand)}</strong></td>
+            <td><span class="badge badge-pla">${escapeHtml(f.type)}</span></td>
+            <td><span class="color-chip" style="background:${f.color}"></span>${escapeHtml(f.colorName)}</td>
+            <td>${f.weight}g</td>
+            <td>${f.price.toFixed(2)} TL</td>
+            <td style="font-weight:700; color:var(--lightning-blue);">${f.pricePerKg.toFixed(2)} TL</td>
+            <td style="font-weight:700; color:var(--lightning-blue);">${f.pricePerG.toFixed(4)} TL</td>
+            <td style="text-align:right;">
+              <button class="btn btn-secondary btn-icon btn-sm" title="Düzenle" onclick="openEditModal('${f.id}')">✏️</button>
+              <button class="btn btn-danger-outline btn-icon btn-sm" title="Sil" onclick="deleteFilament('${f.id}')">🗑️</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+/* ════════════════════════════════════════════════════════════
+   HAZIR MODELLER & SİLME
+   ════════════════════════════════════════════════════════════ */
+function renderPresets() {
+  const presets = getPresets();
+  const filaments = getFilaments();
+  const amort = getAmort();
+  const query = (document.getElementById('preset-search')?.value || '').toLowerCase();
+  const container = document.getElementById('presets-list-container');
+
+  const filtered = presets.filter(p => p.name.toLowerCase().includes(query) || (p.desc && p.desc.toLowerCase().includes(query)));
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:32px; color:var(--text-muted);">Kayıtlı hazır model bulunamadı.</div>`;
+    return;
+  }
+
+  const hourlyAmortRate = amort.targetHours > 0 ? (amort.printerPrice / amort.targetHours) : 0;
+
+  container.innerHTML = filtered.map(p => {
+    let totalMat = 0;
+    let totalWeight = 0;
+    let chipsHtml = '';
+
+    (p.items || []).forEach(it => {
+      const f = filaments.find(x => x.id === it.filamentId);
+      if (f) {
+        totalMat += (it.grams * f.pricePerG);
+        totalWeight += it.grams;
+        chipsHtml += `<span class="badge" style="background:${f.color}22; color:${f.color}; border:1px solid ${f.color}44;">
+          ${f.colorName} (${it.grams}g)
+        </span>`;
+      }
+    });
+
+    const elec = p.hours * amort.electricity;
+    const amortCost = p.hours * hourlyAmortRate;
+    const base = totalMat + elec + amortCost;
+    const wear = base * (amort.wearPct / 100);
+    const netCost = base + wear;
+    const sale = netCost * (1 + (p.profitPct / 100));
+
+    return `
+      <div class="preset-card">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+            <strong style="font-size:15px;">${escapeHtml(p.name)}</strong>
+            <div style="display:flex; gap:4px;">
+              <button class="btn btn-secondary btn-icon btn-sm" title="Hesaplayıcıya Yükle" onclick="loadPresetToCalculator('${p.id}')">🧮</button>
+              <button class="btn btn-secondary btn-icon btn-sm" title="Düzenle" onclick="editPreset('${p.id}')">✏️</button>
+              <button class="btn btn-danger-outline btn-icon btn-sm" title="Sil" onclick="deletePreset('${p.id}')">🗑️</button>
+            </div>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">${escapeHtml(p.desc || '')}</div>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;">
+            <span class="badge badge-pla">⏱️ ${p.hours} sa</span>
+            <span class="badge badge-petg">⚖️ ${totalWeight} g</span>
+            ${chipsHtml}
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; padding-top:10px; border-top:1px solid var(--border);">
+            <div style="font-size:11px; color:var(--text-muted);">
+              Maliyet: <strong style="color:var(--text-primary);">${netCost.toFixed(2)} TL</strong>
+            </div>
+            <div style="font-size:18px; font-weight:800; color:var(--electric-orange); font-family:'Space Grotesk';">
+              ${sale.toFixed(2)} TL
+            </div>
+          </div>
+          <button class="btn btn-lightning btn-sm" style="width:100%; margin-top:10px;" onclick="loadPresetToCalculator('${p.id}')">
+            ⚡ Hızlı Hesapla & Teklif Ver
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function deletePreset(id) {
+  const presets = getPresets();
+  const p = presets.find(x => x.id === id);
+  const name = p ? p.name : 'Bu modeli';
+
+  showConfirm(
+    'Hazır Modeli Sil',
+    `"${name}" kataloğunuzdan silinecek. Emin misiniz?`,
+    () => {
+      const updated = presets.filter(x => x.id !== id);
+      savePresets(updated);
+      renderPresets();
+      showToast('Hazır model silindi.', 'info');
+    }
+  );
+}
+
+function openNewPresetModal(fromCalc = null) {
+  document.getElementById('pm-edit-id').value = '';
+  document.getElementById('preset-modal-title').textContent = '⭐ Yeni Hazır Model';
+  document.getElementById('preset-form').reset();
+  document.getElementById('pm-filament-rows').innerHTML = '';
+
+  if (fromCalc) {
+    document.getElementById('pm-name').value = fromCalc.name;
+    document.getElementById('pm-hours').value = fromCalc.hours;
+    document.getElementById('pm-profit').value = fromCalc.profitPct;
+    fromCalc.items.forEach(it => addPresetFilamentRow(it.filamentId, it.grams));
+  } else {
+    document.getElementById('pm-profit').value = getAmort().defaultProfit;
+    addPresetFilamentRow();
+  }
+  document.getElementById('preset-modal').classList.remove('hidden');
+}
+
+function editPreset(id) {
+  const presets = getPresets();
+  const p = presets.find(x => x.id === id);
+  if (!p) return;
+
+  document.getElementById('pm-edit-id').value = p.id;
+  document.getElementById('preset-modal-title').textContent = '✏️ Hazır Modeli Düzenle';
+  document.getElementById('pm-name').value = p.name;
+  document.getElementById('pm-desc').value = p.desc || '';
+  document.getElementById('pm-hours').value = p.hours;
+  document.getElementById('pm-profit').value = p.profitPct;
+
+  const container = document.getElementById('pm-filament-rows');
+  container.innerHTML = '';
+  (p.items || []).forEach(it => addPresetFilamentRow(it.filamentId, it.grams));
+  if (container.children.length === 0) addPresetFilamentRow();
+
+  document.getElementById('preset-modal').classList.remove('hidden');
+}
+function closePresetModal() { document.getElementById('preset-modal').classList.add('hidden'); }
+
+function addPresetFilamentRow(selectedId = '', grams = '') {
+  const filaments = getFilaments();
+  const container = document.getElementById('pm-filament-rows');
+  const div = document.createElement('div');
+  div.style.display = 'grid';
+  div.style.gridTemplateColumns = '2.5fr 1fr 32px';
+  div.style.gap = '8px';
+  div.style.alignItems = 'center';
+
+  let opts = '<option value="">Filament...</option>';
+  filaments.forEach(f => {
+    opts += `<option value="${f.id}" ${f.id === selectedId ? 'selected' : ''}>${f.brand} ${f.type} - ${f.colorName}</option>`;
+  });
+
+  div.innerHTML = `
+    <select class="form-select pm-fil-select" required>${opts}</select>
+    <div class="input-with-unit">
+      <input type="number" class="form-input pm-fil-grams" placeholder="g" min="1" step="1" value="${grams}" required>
+      <span class="unit">g</span>
+    </div>
+    <button type="button" class="btn-del-row" onclick="this.parentElement.remove()">✕</button>
+  `;
+  container.appendChild(div);
+}
+
+function handlePresetSubmit(e) {
+  e.preventDefault();
+  const editId = document.getElementById('pm-edit-id').value;
+  const name = document.getElementById('pm-name').value.trim();
+  const desc = document.getElementById('pm-desc').value.trim();
+  const hours = parseFloat(document.getElementById('pm-hours').value) || 0;
+  const profitPct = parseFloat(document.getElementById('pm-profit').value) || 0;
+
+  const items = [];
+  document.querySelectorAll('#pm-filament-rows > div').forEach(row => {
+    const fId = row.querySelector('.pm-fil-select').value;
+    const g = parseFloat(row.querySelector('.pm-fil-grams').value) || 0;
+    if (fId && g > 0) items.push({ filamentId: fId, grams: g });
+  });
+
+  if (items.length === 0) {
+    showToast('En az 1 adet filament ekleyin.', 'error');
+    return;
+  }
+
+  const presets = getPresets();
+  if (editId) {
+    const idx = presets.findIndex(x => x.id === editId);
+    if (idx !== -1) presets[idx] = { ...presets[idx], name, desc, hours, profitPct, items };
+  } else {
+    presets.push({ id: 'p_' + Date.now(), name, desc, hours, profitPct, items });
+  }
+
+  savePresets(presets);
+  closePresetModal();
+  renderPresets();
+  showToast('Hazır model kaydedildi!');
+}
+
+function loadPresetToCalculator(id) {
+  const presets = getPresets();
+  const p = presets.find(x => x.id === id);
+  if (!p) return;
+
+  switchTab('calculate');
+  document.getElementById('c-job-name').value = p.name;
+  document.getElementById('c-hours').value = p.hours;
+  document.getElementById('c-profit').value = p.profitPct;
+
+  const list = document.getElementById('multi-filament-list');
+  list.innerHTML = '';
+  (p.items || []).forEach(it => addFilamentRow(it.filamentId, it.grams));
+  if (list.children.length === 0) addFilamentRow();
+
+  liveCalculate();
+  showToast(`"${p.name}" yüklendi!`);
+}
+
+/* ════════════════════════════════════════════════════════════
+   BASKI GEÇMİŞİ & SİLME
+   ════════════════════════════════════════════════════════════ */
+function renderHistoryTable() {
+  const history = getHistory();
+  const tbody = document.getElementById('history-tbody');
+  if (history.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:32px; color:var(--text-muted);">Henüz kayıtlı baskı geçmişi yok.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = history.map(h => `
+    <tr>
+      <td style="color:var(--text-muted); font-size:12px;">${h.date}</td>
+      <td><strong>${escapeHtml(h.name)}</strong></td>
+      <td>${h.hours} sa</td>
+      <td>${h.grams?.toFixed(1) || '-'} g</td>
+      <td>${h.netCost?.toFixed(2) || '-'} TL</td>
+      <td style="color:var(--electric-orange); font-weight:700;">${h.salePrice?.toFixed(2) || '-'} TL</td>
+      <td style="color:var(--lightning-blue); font-weight:700;">+${h.profit?.toFixed(2) || '-'} TL</td>
+      <td>
+        <button class="btn btn-danger-outline btn-icon btn-sm" title="Kaydı Sil" onclick="deleteHistoryItem('${h.id}')">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function deleteHistoryItem(id) {
+  showConfirm(
+    'Kayıt Silinecek',
+    'Bu üretim geçmişi kaydını silmek istediğinize emin misiniz?',
+    () => {
+      const history = getHistory().filter(x => x.id !== id);
+      saveHistory(history);
+      renderHistoryTable();
+      showToast('Kayıt silindi.', 'info');
+    }
+  );
+}
+
+function promptClearHistory() {
+  showConfirm(
+    'Tüm Geçmişi Temizle',
+    'Tüm baskı üretim geçmişi silinecektir. Emin misiniz?',
+    () => {
+      saveHistory([]);
+      renderHistoryTable();
+      showToast('Tüm geçmiş temizlendi.');
+    }
+  );
+}
+
+/* ════════════════════════════════════════════════════════════
+   BACKUP & RESTORE
+   ════════════════════════════════════════════════════════════ */
+function exportData() {
+  const backup = {
+    filaments: getFilaments(),
+    amort: getAmort(),
+    presets: getPresets(),
+    history: getHistory(),
+    exportDate: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `3D_Print_Studio_Backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Yedek indirildi! 📥');
+}
+function importDataClick() { document.getElementById('import-file').click(); }
+
+let pendingImportData = null;
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || (!data.filaments && !data.presets && !data.amort)) {
+        showToast('Geçersiz yedek dosyası!', 'error');
+        return;
+      }
+      pendingImportData = data;
+      // Kullanıcıya birleştirme veya değiştirme seçeneği sun
+      document.getElementById('import-options-modal').classList.remove('hidden');
+    } catch {
+      showToast('Hatalı JSON dosyası formatı!', 'error');
+    }
+  };
+  reader.readAsText(file);
+  // inputu sıfırla ki aynı dosya tekrar seçilebilsin
+  event.target.value = '';
+}
+
+function cancelImport() {
+  pendingImportData = null;
+  document.getElementById('import-options-modal').classList.add('hidden');
+}
+
+function executeImport(mode) {
+  if (!pendingImportData) return;
+  const incoming = pendingImportData;
+  document.getElementById('import-options-modal').classList.add('hidden');
+
+  if (mode === 'replace') {
+    // 1) Tamamen Değiştir
+    if (incoming.filaments) saveFilaments(incoming.filaments);
+    if (incoming.amort) saveAmort(incoming.amort);
+    if (incoming.presets) savePresets(incoming.presets);
+    if (incoming.history) saveHistory(incoming.history);
+    showToast('Tüm veriler yedekle değiştirildi! 🚀');
+  } else {
+    // 2) Üzerine Ekle / Birleştir (Merge)
+    // Filamentler: Çakışmayanları ekle, aynı isim & renkteyse güncelle
+    const currentFilaments = getFilaments();
+    (incoming.filaments || []).forEach(inF => {
+      const existingIdx = currentFilaments.findIndex(cF => 
+        cF.brand.toLowerCase() === inF.brand.toLowerCase() &&
+        cF.type.toLowerCase() === inF.type.toLowerCase() &&
+        cF.colorName.toLowerCase() === inF.colorName.toLowerCase()
+      );
+      if (existingIdx !== -1) {
+        currentFilaments[existingIdx] = { ...currentFilaments[existingIdx], ...inF };
+      } else {
+        currentFilaments.push({ ...inF, id: 'f_' + Date.now() + Math.random().toString(36).substr(2, 4) });
+      }
+    });
+    saveFilaments(currentFilaments);
+
+    // Hazır Modeller: Çakışmayan isimleri ekle
+    const currentPresets = getPresets();
+    (incoming.presets || []).forEach(inP => {
+      const exists = currentPresets.some(cP => cP.name.toLowerCase() === inP.name.toLowerCase());
+      if (!exists) {
+        currentPresets.push({ ...inP, id: 'p_' + Date.now() + Math.random().toString(36).substr(2, 4) });
+      }
+    });
+    savePresets(currentPresets);
+
+    // Baskı Geçmişi: Çakışmayan id/tarih kayıtlarını ekle
+    const currentHistory = getHistory();
+    (incoming.history || []).forEach(inH => {
+      const exists = currentHistory.some(cH => cH.id === inH.id || (cH.date === inH.date && cH.name === inH.name));
+      if (!exists) currentHistory.push(inH);
+    });
+    saveHistory(currentHistory);
+
+    // Amortisman: En güncel saat ve kârı koru / birleştir
+    if (incoming.amort) {
+      const curA = getAmort();
+      curA.completedHours = Math.max(curA.completedHours || 0, incoming.amort.completedHours || 0);
+      curA.totalProfit = Math.max(curA.totalProfit || 0, incoming.amort.totalProfit || 0);
+      if (incoming.amort.printerPrice && !curA.printerPrice) curA.printerPrice = incoming.amort.printerPrice;
+      saveAmort(curA);
+    }
+
+    showToast('Veriler başarıyla birleştirildi! Mevcut kayıtlarınız korundu. ✅');
+  }
+
+  pendingImportData = null;
+  setTimeout(() => location.reload(), 1000);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/* ════════════════════════════════════════════════════════════
+   INIT
+   ════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  loadAmortFields();
+  renderFilaments();
+  renderPresets();
+  renderHistoryTable();
+
+  // İlk filament satırı
+  addFilamentRow('f1', '90');
+});
+
+// Modal Close Handlers
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.add('hidden');
+  });
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+  }
+});
+// Service Worker Kaydı (PWA / Çevrimdışı Çalışma)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>

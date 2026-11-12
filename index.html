@@ -161,6 +161,7 @@
     /* ─── Tab Bar ─── */
     .tab-bar {
       display: flex;
+      flex-wrap: wrap;
       gap: 6px;
       background: var(--bg-secondary);
       border: 1px solid var(--border);
@@ -169,7 +170,8 @@
       margin-bottom: 20px;
     }
     .tab-btn {
-      flex: 1;
+      flex: 1 1 auto;
+      min-width: 130px;
       padding: 10px 14px;
       border: none;
       border-radius: var(--radius-sm);
@@ -579,6 +581,95 @@
       .machine-quick-bar { grid-template-columns: 1fr 1fr; }
       .amort-inline-grid { grid-template-columns: 1fr 1fr; }
       .app-container { padding: 14px; }
+    }
+
+    /* ─── Telefon ve Mobil Ekran Uyumluluğu ─── */
+    @media (max-width: 768px) {
+      .app-container {
+        padding: 10px 10px 40px;
+      }
+      .app-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .header-actions {
+        display: flex;
+        width: 100%;
+        gap: 6px;
+      }
+      .header-actions .btn-top {
+        flex: 1 1 0;
+        justify-content: center;
+        padding: 0 6px;
+        font-size: 11.5px;
+        height: 38px;
+        white-space: nowrap;
+      }
+
+      /* Menü Butonları: Yana kaydırmayı tamamen bitirip 2'şerli alt alta sıralama */
+      .tab-bar {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        padding: 6px;
+      }
+      /* 5. Buton (Kâr Filtreleri & Ayarlar) alt satırı tek başına tam kaplar */
+      .tab-bar .tab-btn:last-child {
+        grid-column: span 2;
+      }
+      .tab-btn {
+        min-width: 0;
+        padding: 11px 8px;
+        font-size: 12.5px;
+        gap: 6px;
+        justify-content: center;
+        text-align: center;
+        min-height: 42px;
+        white-space: nowrap;
+      }
+
+      .machine-quick-bar {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .mq-card {
+        padding: 10px 12px;
+      }
+      .mq-val {
+        font-size: 18px;
+      }
+      .mq-lbl {
+        font-size: 10.5px;
+      }
+
+      .tier-row {
+        grid-template-columns: 1fr 1fr 1fr 30px;
+        gap: 6px;
+        padding: 8px 6px;
+      }
+      .tier-row .form-input {
+        padding: 6px 6px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .tab-btn {
+        padding: 9px 4px;
+        font-size: 11.5px;
+        gap: 4px;
+      }
+      .logo-text h1 {
+        font-size: 18px;
+      }
+      .card {
+        padding: 14px 12px;
+      }
+      .amort-quick-box {
+        padding: 12px;
+      }
     }
   </style>
 </head>

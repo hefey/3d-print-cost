@@ -597,7 +597,10 @@
       </div>
     </div>
     <div class="header-actions">
-      <button class="btn-top" onclick="exportData()" title="Verileri Yedekle">📥 Yedekle</button>
+      <button class="btn-top" id="btn-cloud-sync" onclick="openCloudSyncModal()" style="border-color:rgba(0,210,255,0.4); color:var(--lightning-blue);">
+        <span>☁️</span><span id="btn-cloud-sync-text">Bulut Senkronu</span>
+      </button>
+      <button class="btn-top" onclick="exportData()" title="Verileri Dosya Olarak Yedekle">📥 Yedekle</button>
       <button class="btn-top" onclick="importDataClick()" title="Yedekten Geri Yükle">📤 İçe Aktar</button>
       <input type="file" id="import-file" style="display:none" onchange="importData(event)">
     </div>
@@ -1063,6 +1066,98 @@
 
 <!-- Toast Container -->
 <div class="toast-container" id="toast-container"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: BULUT SENKRONİZASYONU (SEÇENEK A: ANINDA EŞLEŞTİRME)
+     ══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="cloud-sync-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-header">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:22px;">☁️</span>
+        <h3 style="font-size:17px; font-weight:700;">Bulut Senkronizasyonu</h3>
+      </div>
+      <button class="modal-close" onclick="closeCloudSyncModal()">✕</button>
+    </div>
+
+    <!-- Durum A: Henüz Bağlı Değil -->
+    <div id="cloud-view-unlinked">
+      <p style="font-size:12px; color:var(--text-muted); line-height:1.5; margin-bottom:16px;">
+        Telefonunuz ile bilgisayarınızı eşleştirin. Dosya indirip göndermeden tüm verilerinizi tek tıkla senkronize edin.
+      </p>
+
+      <div style="background:rgba(0,210,255,0.06); border:1px solid rgba(0,210,255,0.25); border-radius:var(--radius-md); padding:16px; margin-bottom:14px; text-align:center;">
+        <div style="font-size:14px; font-weight:700; color:var(--lightning-blue); margin-bottom:6px;">
+          1. Adım: Bu Cihazı Ana Cihaz Yap
+        </div>
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">
+          Yeni bir bulut eşleşme kodu ve QR kod üretir, mevcut verilerinizi buluta aktarır.
+        </div>
+        <button class="btn btn-lightning" style="width:100%;" onclick="createCloudSync()">
+          ⚡ Yeni Bulut Eşleşme Kodu Oluştur
+        </button>
+      </div>
+
+      <div style="text-align:center; margin:12px 0; font-size:12px; color:var(--text-muted); font-weight:700;">— VEYA —</div>
+
+      <div style="background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:6px;">
+          Diğer Cihazın Kodunu Girerek Bağlan
+        </div>
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">
+          Diğer cihazınızda üretilen kodu buraya yapıştırın:
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input type="text" class="form-input" id="cloud-input-code" placeholder="Örn: ff808181a09d..." style="font-family:monospace; font-size:12px;">
+          <button class="btn btn-orange btn-sm" onclick="joinCloudSync()">Bağlan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Durum B: Cihaz Bağlı -->
+    <div id="cloud-view-linked" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,240,168,0.1); border:1px solid rgba(0,240,168,0.3); border-radius:var(--radius-sm); padding:8px 12px; margin-bottom:14px;">
+        <span style="font-size:12px; font-weight:700; color:var(--success); display:flex; align-items:center; gap:6px;">
+          <span style="width:8px; height:8px; border-radius:50%; background:var(--success); display:inline-block;"></span>
+          Bulut Bağlantısı Aktif
+        </span>
+        <button class="btn btn-danger-outline btn-sm" style="padding:2px 8px; font-size:11px;" onclick="unlinkCloudSync()">Bağlantıyı Kes</button>
+      </div>
+
+      <!-- Kod & Kopyala -->
+      <div style="background:var(--bg-input); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:14px;">
+        <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:4px;">Senkronizasyon Kodunuz</div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <code id="cloud-active-code" style="font-size:12px; color:var(--lightning-blue); word-break:break-all;">-</code>
+          <button class="btn btn-secondary btn-sm" style="margin-left:8px;" onclick="copyCloudCode()">📋 Kopyala</button>
+        </div>
+      </div>
+
+      <!-- QR Kod (Telefonda okutmak için) -->
+      <div style="text-align:center; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px; margin-bottom:14px;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:4px;">📱 Telefonunuzdan Hızlı Bağlanın</div>
+        <div style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">iPhone veya Android kameranızı bu QR koda tutun; otomatik bağlanır:</div>
+        <div id="cloud-qr-wrap" style="display:inline-block; padding:8px; background:#fff; border-radius:var(--radius-sm);">
+          <img id="cloud-qr-img" src="" alt="QR Kod" style="width:160px; height:160px; display:block;">
+        </div>
+      </div>
+
+      <!-- Canlı Butonlar -->
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button class="btn btn-lightning" onclick="uploadToCloud()">
+          ☁️ Bu Cihazdaki Verileri Buluta Gönder (Yükle)
+        </button>
+        <button class="btn btn-orange" onclick="downloadFromCloud()">
+          ⚡ Buluttan Çek & Bu Cihazla Birleştir (İndir)
+        </button>
+      </div>
+
+      <div style="font-size:11px; color:var(--text-muted); text-align:center; margin-top:12px;" id="cloud-sync-status-msg">
+        Son işlem: Henüz yapılmadı
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════
      MODAL: İÇE AKTARMA (IMPORT)
@@ -2366,6 +2461,281 @@ function executeImport(mode) {
   setTimeout(() => location.reload(), 800);
 }
 
+/* ════════════════════════════════════════════════════════════
+   BULUT SENKRONİZASYONU (SEÇENEK A: HESAPSIZ ANINDA EŞLEŞTİRME)
+   ════════════════════════════════════════════════════════════ */
+const CLOUD_API_BASE = 'https://api.restful-api.dev/objects';
+const STORAGE_CLOUD_KEY = '3dp_cloud_sync_id';
+
+function getCloudSyncId() {
+  return localStorage.getItem(STORAGE_CLOUD_KEY) || null;
+}
+
+function updateCloudHeaderButton() {
+  const syncId = getCloudSyncId();
+  const btn = document.getElementById('btn-cloud-sync');
+  const txt = document.getElementById('btn-cloud-sync-text');
+  if (!btn || !txt) return;
+
+  if (syncId) {
+    btn.style.borderColor = 'var(--success)';
+    btn.style.color = 'var(--success)';
+    txt.textContent = 'Bulut (Bağlı)';
+  } else {
+    btn.style.borderColor = 'rgba(0,210,255,0.4)';
+    btn.style.color = 'var(--lightning-blue)';
+    txt.textContent = 'Bulut Senkronu';
+  }
+}
+
+function openCloudSyncModal() {
+  const syncId = getCloudSyncId();
+  const modal = document.getElementById('cloud-sync-modal');
+  const unlinkedView = document.getElementById('cloud-view-unlinked');
+  const linkedView = document.getElementById('cloud-view-linked');
+
+  if (syncId) {
+    unlinkedView.style.display = 'none';
+    linkedView.style.display = 'block';
+
+    document.getElementById('cloud-active-code').textContent = syncId;
+    
+    // QR Kod ve Paylaşım Linki Oluştur
+    const cleanUrl = window.location.origin + window.location.pathname;
+    const shareUrl = `${cleanUrl}?sync=${syncId}`;
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(shareUrl)}`;
+    document.getElementById('cloud-qr-img').src = qrUrl;
+
+    const lastSyncTime = localStorage.getItem('3dp_last_sync_time') || 'Bilinmiyor';
+    document.getElementById('cloud-sync-status-msg').textContent = `Son Eşitleme: ${lastSyncTime}`;
+  } else {
+    unlinkedView.style.display = 'block';
+    linkedView.style.display = 'none';
+  }
+
+  modal.classList.remove('hidden');
+}
+
+function closeCloudSyncModal() {
+  document.getElementById('cloud-sync-modal').classList.add('hidden');
+}
+
+function copyCloudCode() {
+  const syncId = getCloudSyncId();
+  if (!syncId) return;
+  navigator.clipboard.writeText(syncId).then(() => {
+    showToast('Bulut eşleşme kodu panoya kopyalandı! 📋');
+  });
+}
+
+function packAllData() {
+  return {
+    filaments: getFilaments(),
+    amort: getAmort(),
+    profitTiers: getProfitTiers(),
+    presets: getPresets(),
+    history: getHistory(),
+    syncTimestamp: new Date().toISOString()
+  };
+}
+
+async function createCloudSync() {
+  showToast('Bulut alanı oluşturuluyor...', 'info');
+  try {
+    const payload = packAllData();
+    const res = await fetch(CLOUD_API_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: '3D-PRINT-STUDIO-DATA',
+        data: payload
+      })
+    });
+    const result = await res.json();
+    if (result && result.id) {
+      localStorage.setItem(STORAGE_CLOUD_KEY, result.id);
+      localStorage.setItem('3dp_last_sync_time', new Date().toLocaleString('tr-TR'));
+      updateCloudHeaderButton();
+      openCloudSyncModal();
+      showToast('Bulut alanı hazırlandı ve veriler yüklendi! ☁️');
+    } else {
+      showToast('Bulut alanı oluşturulamadı!', 'error');
+    }
+  } catch (err) {
+    showToast('Bağlantı hatası! İnternetinizi kontrol edin.', 'error');
+  }
+}
+
+async function joinCloudSync() {
+  const code = document.getElementById('cloud-input-code').value.trim();
+  if (!code) {
+    showToast('Lütfen geçerli bir kod girin.', 'error');
+    return;
+  }
+
+  showToast('Buluta bağlanılıyor...', 'info');
+  try {
+    const res = await fetch(`${CLOUD_API_BASE}/${code}`);
+    if (!res.ok) {
+      showToast('Bu koda ait bulut verisi bulunamadı!', 'error');
+      return;
+    }
+    const result = await res.json();
+    if (result && result.data) {
+      localStorage.setItem(STORAGE_CLOUD_KEY, code);
+      // Gelen verileri birleştir
+      executeMergeAllData(result.data);
+      localStorage.setItem('3dp_last_sync_time', new Date().toLocaleString('tr-TR'));
+      updateCloudHeaderButton();
+      openCloudSyncModal();
+      showToast('Cihaz başarıyla bağlandı ve veriler eşitlendi! ⚡');
+    }
+  } catch (err) {
+    showToast('Bağlantı hatası oluştu!', 'error');
+  }
+}
+
+async function uploadToCloud() {
+  const syncId = getCloudSyncId();
+  if (!syncId) return;
+
+  showToast('Buluta yükleniyor...', 'info');
+  try {
+    const payload = packAllData();
+    const res = await fetch(`${CLOUD_API_BASE}/${syncId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: '3D-PRINT-STUDIO-DATA',
+        data: payload
+      })
+    });
+    if (res.ok) {
+      const now = new Date().toLocaleString('tr-TR');
+      localStorage.setItem('3dp_last_sync_time', now);
+      document.getElementById('cloud-sync-status-msg').textContent = `Son Eşitleme: ${now} (Yüklendi)`;
+      showToast('Tüm verileriniz buluta güncellendi! ☁️✅');
+    } else {
+      showToast('Yükleme başarısız oldu.', 'error');
+    }
+  } catch (err) {
+    showToast('İnternet bağlantınızı kontrol edin!', 'error');
+  }
+}
+
+async function downloadFromCloud() {
+  const syncId = getCloudSyncId();
+  if (!syncId) return;
+
+  showToast('Buluttan indiriliyor...', 'info');
+  try {
+    const res = await fetch(`${CLOUD_API_BASE}/${syncId}`);
+    if (!res.ok) {
+      showToast('Buluttan veri çekilemedi.', 'error');
+      return;
+    }
+    const result = await res.json();
+    if (result && result.data) {
+      executeMergeAllData(result.data);
+      const now = new Date().toLocaleString('tr-TR');
+      localStorage.setItem('3dp_last_sync_time', now);
+      document.getElementById('cloud-sync-status-msg').textContent = `Son Eşitleme: ${now} (İndirildi)`;
+      showToast('Buluttaki veriler cihazınızla birleştirildi! ⚡✅');
+      setTimeout(() => location.reload(), 1000);
+    }
+  } catch (err) {
+    showToast('İnternet bağlantınızı kontrol edin!', 'error');
+  }
+}
+
+function unlinkCloudSync() {
+  showConfirm(
+    'Bulut Bağlantısını Kes',
+    'Bu cihazın bulut eşleşmesini kaldırmak istiyor musunuz? (Cihazınızdaki yerel veriler silinmez)',
+    () => {
+      localStorage.removeItem(STORAGE_CLOUD_KEY);
+      localStorage.removeItem('3dp_last_sync_time');
+      updateCloudHeaderButton();
+      openCloudSyncModal();
+      showToast('Bulut eşleşmesi kaldırıldı.', 'info');
+    }
+  );
+}
+
+// Akıllı Birleştirme
+function executeMergeAllData(incoming) {
+  if (!incoming) return;
+
+  // Filamentler
+  if (incoming.filaments && Array.isArray(incoming.filaments)) {
+    const current = getFilaments();
+    incoming.filaments.forEach(inF => {
+      const existingIdx = current.findIndex(cF => 
+        cF.brand?.toLowerCase() === inF.brand?.toLowerCase() &&
+        cF.type?.toLowerCase() === inF.type?.toLowerCase() &&
+        cF.colorName?.toLowerCase() === inF.colorName?.toLowerCase()
+      );
+      if (existingIdx !== -1) {
+        current[existingIdx] = { ...current[existingIdx], ...inF };
+      } else {
+        current.push({ ...inF, id: inF.id || ('f_' + Date.now() + Math.random().toString(36).substr(2, 4)) });
+      }
+    });
+    saveFilaments(current);
+  }
+
+  // Hazır Modeller
+  if (incoming.presets && Array.isArray(incoming.presets)) {
+    const currentPresets = getPresets();
+    incoming.presets.forEach(inP => {
+      const exists = currentPresets.some(cP => cP.name?.toLowerCase() === inP.name?.toLowerCase());
+      if (!exists) {
+        currentPresets.push({ ...inP, id: inP.id || ('p_' + Date.now() + Math.random().toString(36).substr(2, 4)) });
+      }
+    });
+    savePresets(currentPresets);
+  }
+
+  // Kâr Filtreleri
+  if (incoming.profitTiers && Array.isArray(incoming.profitTiers)) {
+    saveProfitTiersData(incoming.profitTiers);
+  }
+
+  // Geçmiş
+  if (incoming.history && Array.isArray(incoming.history)) {
+    const currentHistory = getHistory();
+    incoming.history.forEach(inH => {
+      const exists = currentHistory.some(cH => cH.id === inH.id || (cH.date === inH.date && cH.name === inH.name));
+      if (!exists) currentHistory.push(inH);
+    });
+    saveHistory(currentHistory);
+  }
+
+  // Amortisman
+  if (incoming.amort) {
+    const curA = getAmort();
+    curA.completedHours = Math.max(curA.completedHours || 0, incoming.amort.completedHours || 0);
+    curA.totalProfit = Math.max(curA.totalProfit || 0, incoming.amort.totalProfit || 0);
+    if (incoming.amort.printerPrice && !curA.printerPrice) curA.printerPrice = incoming.amort.printerPrice;
+    if (incoming.amort.nozzlePrice) curA.nozzlePrice = incoming.amort.nozzlePrice;
+    if (incoming.amort.nozzleHours) curA.nozzleHours = incoming.amort.nozzleHours;
+    saveAmort(curA);
+  }
+}
+
+// URL ile Otomatik Eşleşme Kontrolü (?sync=...)
+async function checkUrlSyncParam() {
+  const params = new URLSearchParams(window.location.search);
+  const syncCode = params.get('sync');
+  if (syncCode) {
+    // URL'den parametreyi temizle
+    window.history.replaceState({}, document.title, window.location.pathname);
+    localStorage.setItem(STORAGE_CLOUD_KEY, syncCode);
+    showToast('QR Kod algılandı! Buluttan veriler çekiliyor...', 'info');
+    await downloadFromCloud();
+  }
+}
+
 function escapeHtml(str) {
   if (!str) return '';
   const d = document.createElement('div');
@@ -2382,6 +2752,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPresets();
   renderHistoryTable();
   renderProfitTiersSettings();
+  updateCloudHeaderButton();
+  checkUrlSyncParam();
 
   // İlk filament satırı
   addFilamentRow('f1', '90');

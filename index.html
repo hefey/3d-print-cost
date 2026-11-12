@@ -2542,15 +2542,31 @@ function packAllData() {
 async function createCloudSync() {
   showToast('Bulut alanı oluşturuluyor...', 'info');
   try {
-    const payload = packAllData();
+    const rawData = packAllData();
+    // API'nin nested JSON kısıtlamalarına takılmaması için tek bir güvenli string haline getiriyoruz
+    const payloadStr = JSON.stringify(rawData);
+
     const res = await fetch(CLOUD_API_BASE, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: JSON.stringify({
-        name: '3D-PRINT-STUDIO-DATA',
-        data: payload
+        name: '3D-PRINT-STUDIO-SYNC',
+        data: {
+          payload: payloadStr
+        }
       })
     });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error('Cloud create error:', res.status, errText);
+      showToast(`Bulut hatası: ${res.status} (${res.statusText || 'Bilinmeyen'})`, 'error');
+      return;
+    }
+
     const result = await res.json();
     if (result && result.id) {
       localStorage.setItem(STORAGE_CLOUD_KEY, result.id);
@@ -2559,10 +2575,12 @@ async function createCloudSync() {
       openCloudSyncModal();
       showToast('Bulut alanı hazırlandı ve veriler yüklendi! ☁️');
     } else {
-      showToast('Bulut alanı oluşturulamadı!', 'error');
+      console.error('Invalid cloud response:', result);
+      showToast('Bulut sunucusu ID üretemedi!', 'error');
     }
   } catch (err) {
-    showToast('Bağlantı hatası! İnternetinizi kontrol edin.', 'error');
+    console.error('Cloud network error:', err);
+    showToast(`Bağlantı hatası: ${err.message || 'İnternet yok'}`, 'error');
   }
 }
 
@@ -2582,15 +2600,19 @@ async function joinCloudSync() {
     }
     const result = await res.json();
     if (result && result.data) {
+      let incomingData = result.data;
+      if (typeof incomingData.payload === 'string') {
+        try { incomingData = JSON.parse(incomingData.payload); } catch(e){}
+      }
       localStorage.setItem(STORAGE_CLOUD_KEY, code);
-      // Gelen verileri birleştir
-      executeMergeAllData(result.data);
+      executeMergeAllData(incomingData);
       localStorage.setItem('3dp_last_sync_time', new Date().toLocaleString('tr-TR'));
       updateCloudHeaderButton();
       openCloudSyncModal();
       showToast('Cihaz başarıyla bağlandı ve veriler eşitlendi! ⚡');
     }
   } catch (err) {
+    console.error('Join error:', err);
     showToast('Bağlantı hatası oluştu!', 'error');
   }
 }
@@ -2601,13 +2623,20 @@ async function uploadToCloud() {
 
   showToast('Buluta yükleniyor...', 'info');
   try {
-    const payload = packAllData();
+    const rawData = packAllData();
+    const payloadStr = JSON.stringify(rawData);
+
     const res = await fetch(`${CLOUD_API_BASE}/${syncId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: JSON.stringify({
-        name: '3D-PRINT-STUDIO-DATA',
-        data: payload
+        name: '3D-PRINT-STUDIO-SYNC',
+        data: {
+          payload: payloadStr
+        }
       })
     });
     if (res.ok) {
@@ -2616,9 +2645,12 @@ async function uploadToCloud() {
       document.getElementById('cloud-sync-status-msg').textContent = `Son Eşitleme: ${now} (Yüklendi)`;
       showToast('Tüm verileriniz buluta güncellendi! ☁️✅');
     } else {
-      showToast('Yükleme başarısız oldu.', 'error');
+      const errText = await res.text();
+      console.error('Upload error:', res.status, errText);
+      showToast(`Yükleme başarısız oldu (${res.status})`, 'error');
     }
   } catch (err) {
+    console.error('Upload error:', err);
     showToast('İnternet bağlantınızı kontrol edin!', 'error');
   }
 }
@@ -2631,12 +2663,16 @@ async function downloadFromCloud() {
   try {
     const res = await fetch(`${CLOUD_API_BASE}/${syncId}`);
     if (!res.ok) {
-      showToast('Buluttan veri çekilemedi.', 'error');
+      showToast(`Buluttan veri çekilemedi (${res.status})`, 'error');
       return;
     }
     const result = await res.json();
     if (result && result.data) {
-      executeMergeAllData(result.data);
+      let incomingData = result.data;
+      if (typeof incomingData.payload === 'string') {
+        try { incomingData = JSON.parse(incomingData.payload); } catch(e){}
+      }
+      executeMergeAllData(incomingData);
       const now = new Date().toLocaleString('tr-TR');
       localStorage.setItem('3dp_last_sync_time', now);
       document.getElementById('cloud-sync-status-msg').textContent = `Son Eşitleme: ${now} (İndirildi)`;
@@ -2644,6 +2680,7 @@ async function downloadFromCloud() {
       setTimeout(() => location.reload(), 1000);
     }
   } catch (err) {
+    console.error('Download error:', err);
     showToast('İnternet bağlantınızı kontrol edin!', 'error');
   }
 }
